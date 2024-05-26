@@ -22,6 +22,7 @@ const lightbox = new SimpleLightbox('.gallery a');
 // Зберігаємо значення поточної сторінки та пошукового запиту
 let currentPage = 1;
 let currentSearchTerm = '';
+let totalHits = 0;
 
 // Функція для відображення повідомлення про помилку з використанням iziToast
 function showError(message) {
@@ -51,6 +52,11 @@ async function loadMoreImages() {
         hideLoader();
         renderImages(images);
         lightbox.refresh();
+        // Перевіряємо, чи досягнуто кінця колекції зображень
+        if (gallery.children.length >= totalHits) {
+            loadMoreBtn.style.display = 'none';
+            showError("We're sorry, but you've reached the end of search results.");
+        }
     } catch (error) {
         hideLoader();
         console.error('Error fetching images:', error.message);
