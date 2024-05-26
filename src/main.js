@@ -1,10 +1,6 @@
-//У файлі main.js напиши всю логіку роботи додатка.
-
-// import axios from 'axios';
-
-
+import axios from 'axios';
 import { fetchImages } from './js/pixabay-api.js';
-import { clearGallery ,renderImages } from './js/render-functions.js';
+import { clearGallery, renderImages } from './js/render-functions.js';
 
 // Описаний у документації
 import iziToast from "izitoast";
@@ -16,14 +12,18 @@ import SimpleLightbox from "simplelightbox";
 // Додатковий імпорт стилів
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-
-
 const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
 const loader = document.querySelector('.loader');
+const gallery = document.querySelector('.gallery');
+const loadMoreBtn = document.getElementById('loadMoreBtn');
 const lightbox = new SimpleLightbox('.gallery a');
 
-// Функция для отображения сообщения об ошибке с использованием iziToast
+// Зберігаємо значення поточної сторінки та пошукового запиту
+let currentPage = 1;
+let currentSearchTerm = '';
+
+// Функція для відображення повідомлення про помилку з використанням iziToast
 function showError(message) {
     iziToast.error({
         title: 'Error',
@@ -32,35 +32,62 @@ function showError(message) {
     });
 }
 
-// Обработчик события отправки формы
+// Функція для відображення індикатора завантаження
+function showLoader() {
+    loader.classList.add('show');
+}
+
+// Функція для приховування індикатора завантаження
+function hideLoader() {
+    loader.classList.remove('show');
+}
+
+// Функція для виконання запиту за додатковими зображеннями
+async function loadMoreImages() {
+    try {
+        showLoader();
+        currentPage++; // Збільшуємо номер сторінки для отримання наступної групи зображень
+        const images = await fetchImages(currentSearchTerm, currentPage);
+        hideLoader();
+        renderImages(images);
+        lightbox.refresh();
+    } catch (error) {
+        hideLoader();
+        console.error('Error fetching images:', error.message);
+        showError('Failed to fetch more images. Please try again later.');
+    }
+}
+
+// Обробник події кліку на кнопку "Load more"
+loadMoreBtn.addEventListener('click', loadMoreImages);
+
+// Обробник події відправки форми
 searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const searchTerm = searchInput.value.trim();
     if (!searchTerm) {
         showError('Please enter a search term');
         return;
     }
- // Показати індикатор завантаження після натискання кнопки
-    loader.classList.add('show');
+    
+    // Очищаємо галерею та скидаємо поточну сторінку при новому пошуковому запиті
+    currentPage = 1;
+    currentSearchTerm = searchTerm;
     clearGallery();
 
     try {
-        const images =await fetchImages(searchTerm);
-    setTimeout (() => {
-        loader.classList.remove('show');
-        if (images.length === 0) {
-            showError('Sorry, there are no images matching your search query. Please try again!');
-                } else {
-                        renderImages(images);
-                        searchInput.value = '';
-                        lightbox.refresh();   
-                    }}, 1000) 
-        } catch(error => {
-        // Приховати індикатор завантаження у випадку помилки
-        loader.classList.remove('show');
-
+        showLoader();
+        const images = await fetchImages(searchTerm, currentPage);
+        hideLoader();
+        renderImages(images);
+        lightbox.refresh();
+        // Показуємо кнопку "Load more" після отримання результатів запиту
+        loadMoreBtn.style.display = 'block';
+    } catch (error) {
+        hideLoader();
         console.error('Error fetching images:', error.message);
         showError('Failed to fetch images. Please try again later.');
-        });
+    }
 });
 
