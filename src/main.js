@@ -1,5 +1,8 @@
 //У файлі main.js напиши всю логіку роботи додатка.
 
+// import axios from 'axios';
+
+
 import { fetchImages } from './js/pixabay-api.js';
 import { clearGallery ,renderImages } from './js/render-functions.js';
 
@@ -12,6 +15,8 @@ import "izitoast/dist/css/iziToast.min.css";
 import SimpleLightbox from "simplelightbox";
 // Додатковий імпорт стилів
 import "simplelightbox/dist/simple-lightbox.min.css";
+
+
 
 const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
@@ -28,40 +33,34 @@ function showError(message) {
 }
 
 // Обработчик события отправки формы
-searchForm.addEventListener('submit', (event) => {
+searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-
     const searchTerm = searchInput.value.trim();
     if (!searchTerm) {
         showError('Please enter a search term');
         return;
     }
-      // Показати індикатор завантаження після натискання кнопки
-      loader.classList.add('show');
-      clearGallery();
+ // Показати індикатор завантаження після натискання кнопки
+    loader.classList.add('show');
+    clearGallery();
 
-    fetchImages(searchTerm)
-        .then(images => {
-  // Затримка на 2 секунди перед відображенням результатів
-  setTimeout(() => {
-    // Приховати індикатор завантаження після завершення запиту
-    loader.classList.remove('show');
-
-    if (images.length === 0) {
-        showError('Sorry, there are no images matching your search query. Please try again!');
-    } else {
-        renderImages(images);
-        searchInput.value = '';
-        lightbox.refresh();   
-    }
-}, 2000); // 2 секунди затримки
-})
-        .catch(error => {
-               // Приховати індикатор завантаження у випадку помилки
+    try {
+        const images =await fetchImages(searchTerm);
+    setTimeout (() => {
+        loader.classList.remove('show');
+        if (images.length === 0) {
+            showError('Sorry, there are no images matching your search query. Please try again!');
+                } else {
+                        renderImages(images);
+                        searchInput.value = '';
+                        lightbox.refresh();   
+                    }}, 1000) 
+        } catch(error => {
+        // Приховати індикатор завантаження у випадку помилки
         loader.classList.remove('show');
 
-            console.error('Error fetching images:', error.message);
-            showError('Failed to fetch images. Please try again later.');
+        console.error('Error fetching images:', error.message);
+        showError('Failed to fetch images. Please try again later.');
         });
 });
 
