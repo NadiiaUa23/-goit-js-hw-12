@@ -19,10 +19,9 @@ const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
 const lightbox = new SimpleLightbox('.gallery a');
 
-// Зберігаємо значення поточної сторінки та пошукового запиту
-let currentPage = 1;
-let currentSearchTerm = '';
-let totalHits = 0;
+let searchTerm = '';
+let page = 1;
+
 
 // Функція для відображення повідомлення про помилку з використанням iziToast
 function showError(message) {
@@ -33,67 +32,78 @@ function showError(message) {
     });
 }
 
-// Функція для відображення індикатора завантаження
-function showLoader() {
-    loader.classList.add('show');
-}
-
-// Функція для приховування індикатора завантаження
-function hideLoader() {
-    loader.classList.remove('show');
-}
-
-// Функція для виконання запиту за додатковими зображеннями
+// Функція для завантаження наступної сторінки зображень
 async function loadMoreImages() {
+    loader.classList.add('show'); 
+    page++;
     try {
-        showLoader();
-        currentPage++; // Збільшуємо номер сторінки для отримання наступної групи зображень
-        const images = await fetchImages(currentSearchTerm, currentPage);
-        hideLoader();
-        renderImages(images);
-        lightbox.refresh();
-        // Перевіряємо, чи досягнуто кінця колекції зображень
-        if (gallery.children.length >= totalHits) {
-            loadMoreBtn.style.display = 'none';
-            showError("We're sorry, but you've reached the end of search results.");
-        }
+        const images = await fetchImages(searchTerm, page);
+        if (images.length === 0) {
+            loadMoreBtn.classList.add('hidden'); // Ховаємо кнопку "Load more"
+            showError("We're sorry, but you've reached the end of search results."); // Виводимо повідомлення
+        } else {
+            renderImages(images);
+            lightbox.refresh();
+            loadMoreBtn.classList.remove('hidden');
+             // Плавне прокручування сторінки
+             const galleryHeight = gallery.getBoundingClientRect().height;
+             window.scrollBy({
+                  top: 1100, // Прокрутити на висоту двох карточок галереї
+                  behavior: 'smooth' // Зробити прокрутку плавною
+             });;
+        } 
     } catch (error) {
-        hideLoader();
         console.error('Error fetching images:', error.message);
         showError('Failed to fetch more images. Please try again later.');
     }
+    finally {
+        loader.classList.remove('show'); // Приховання індикатора завантаження після завантаження зображень
+    }
 }
 
-// Обробник події кліку на кнопку "Load more"
+// Обробник події натискання на кнопку "Load more"
 loadMoreBtn.addEventListener('click', loadMoreImages);
+
 
 // Обробник події відправки форми
 searchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const searchTerm = searchInput.value.trim();
+    searchTerm = searchInput.value.trim();
     if (!searchTerm) {
         showError('Please enter a search term');
         return;
     }
-    
-    // Очищаємо галерею та скидаємо поточну сторінку при новому пошуковому запиті
-    currentPage = 1;
-    currentSearchTerm = searchTerm;
+
+    // Показати індикатор завантаження після натискання кнопки
+    loader.classList.add('show');
     clearGallery();
 
     try {
-        showLoader();
-        const images = await fetchImages(searchTerm, currentPage);
-        hideLoader();
-        renderImages(images);
-        lightbox.refresh();
-        // Показуємо кнопку "Load more" після отримання результатів запиту
-        loadMoreBtn.style.display = 'block';
+        page = 1; // Скидаємо значення сторінки до початкового при новому пошуковому запиті
+        const images = await fetchImages(searchTerm, page);
+
+        // loader.classList.add('show');
+        // Затримка на 2 секунди перед відображенням результатів
+        setTimeout(() => {
+            // Приховати індикатор завантаження після завершення запиту
+            loader.classList.remove('show');
+
+            if (images.length === 0) {
+                showError('Sorry, there are no images matching your search query. Please try again!');
+            } else {
+                renderImages(images);
+                searchInput.value = '';
+                lightbox.refresh();
+               
+                // Показуємо кнопку "Load more" після отримання результатів пошуку
+                loadMoreBtn.classList.remove('hidden');
+            }
+        }, 1000); // 2 секунди затримки
     } catch (error) {
-        hideLoader();
+        // Приховати індикатор завантаження у випадку помилки
+        loader.classList.remove('show');
         console.error('Error fetching images:', error.message);
         showError('Failed to fetch images. Please try again later.');
     }
 });
-
