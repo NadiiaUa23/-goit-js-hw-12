@@ -39,12 +39,12 @@ async function loadMoreImages() {
     try {
         const images = await fetchImages(searchTerm, page);
         if (images.length === 0) {
-            loadMoreBtn.classList.add('hidden'); // Ховаємо кнопку "Load more"
+            loadMoreBtn.classList.remove('hidden'); // Ховаємо кнопку "Load more"
             showError("We're sorry, but you've reached the end of search results."); // Виводимо повідомлення
         } else {
             renderImages(images);
             lightbox.refresh();
-            loadMoreBtn.classList.remove('hidden');
+          // loadMoreBtn.classList.remove('hidden');
              // Плавне прокручування сторінки
               const galleryHeight = gallery.getBoundingClientRect().height;
             window.scrollBy({
