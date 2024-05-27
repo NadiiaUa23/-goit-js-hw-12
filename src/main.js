@@ -82,10 +82,6 @@ searchForm.addEventListener('submit', async (event) => {
     try {
         page = 1; // Скидаємо значення сторінки до початкового при новому пошуковому запиті
         const images = await fetchImages(searchTerm, page);
-
-        // loader.classList.add('show');
-        // Затримка на 2 секунди перед відображенням результатів
-        setTimeout(() => {
             // Приховати індикатор завантаження після завершення запиту
             loader.classList.remove('show');
 
@@ -98,7 +94,7 @@ searchForm.addEventListener('submit', async (event) => {
                 // Показуємо кнопку "Load more" після отримання результатів пошуку
                 loadMoreBtn.classList.remove('hidden');
             }
-        }, 1000); // 2 секунди затримки
+    
     } catch (error) {
         // Приховати індикатор завантаження у випадку помилки
         loader.classList.remove('show');
