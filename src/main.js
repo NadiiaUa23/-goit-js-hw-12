@@ -87,6 +87,7 @@ searchForm.addEventListener('submit', async (event) => {
 
             if (images.length === 0) {
                 showError('Sorry, there are no images matching your search query. Please try again!');
+                loadMoreBtn.classList.remove('hidden');
             } else {
                 renderImages(images);
                 searchInput.value = '';
