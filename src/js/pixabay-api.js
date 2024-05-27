@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 // Ваш ключ API
 const apiKey = '43983774-8711aa48aacb0ae1050be5e44';
 

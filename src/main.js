@@ -46,8 +46,8 @@ async function loadMoreImages() {
             lightbox.refresh();
             loadMoreBtn.classList.remove('hidden');
              // Плавне прокручування сторінки
-             const galleryHeight = gallery.getBoundingClientRect().height;
-             window.scrollBy({
+              const galleryHeight = gallery.getBoundingClientRect().height;
+            window.scrollBy({
                   top: 1100, // Прокрутити на висоту двох карточок галереї
                   behavior: 'smooth' // Зробити прокрутку плавною
              });;
@@ -95,7 +95,6 @@ searchForm.addEventListener('submit', async (event) => {
                 renderImages(images);
                 searchInput.value = '';
                 lightbox.refresh();
-               
                 // Показуємо кнопку "Load more" після отримання результатів пошуку
                 loadMoreBtn.classList.remove('hidden');
             }
