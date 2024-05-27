@@ -74,38 +74,36 @@ async function onSearch(event) {
 
     searchTerm = searchInput.value.trim();
     if (!searchTerm) {
-      showError('Please enter a search term');
-      return;
+    showError('Please enter a search term');
+    return;
     }
-  
     // Показати індикатор завантаження після натискання кнопки
     loader.classList.add('show');
     clearGallery();
-  
+
     try {
       page = 1; // Скидаємо значення сторінки до початкового при новому пошуковому запиті
-      const images = await fetchImages(searchTerm, page);
-  
-      if (images.length === 0) {
+    const images = await fetchImages(searchTerm, page);
+if (images.length === 0) {
         showError('We`re sorry, but you`ve reached the end of search results.');
         loadMoreBtn.classList.add('hidden');
-      } else {
+} else {
         renderImages(images);
         searchInput.value = '';
         lightbox.refresh();
         // Показуємо кнопку "Load more" після отримання результатів пошуку
         loadMoreBtn.classList.remove('hidden');
-      }
+}
     } catch (error) {
-      console.error('Error fetching images:', error.message);
-      showError('Failed to fetch images. Please try again later.');
+    console.error('Error fetching images:', error.message);
+    showError('Failed to fetch images. Please try again later.');
     } finally {
       loader.classList.remove('show'); // Приховання індикатора завантаження після завершення запиту
     }
-  }
-  
+ }
+
   // Обробник події натискання на кнопку "Load more"
-  loadMoreBtn.addEventListener('click', loadMoreImages);
-  
+loadMoreBtn.addEventListener('click', loadMoreImages);
+
   // Обробник події відправки форми
-  searchForm.addEventListener('submit', onSearch);
+ searchForm.addEventListener('submit', onSearch);
